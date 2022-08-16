@@ -1,4 +1,4 @@
-module main
+module infowatch_server
 
 go 1.19
 
