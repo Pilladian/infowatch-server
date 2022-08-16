@@ -53,9 +53,15 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 		content, _ := os.ReadFile("html/templates/api/v1/doc.html")
 		fmt.Fprintf(w, string(content))
 	} else if r.Method == "POST" {
-		id := r.URL.Query()["id"][0]
+		id := r.URL.Query()["id"]
+		if len(id) != 1 {
+			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
+			content, _ := os.ReadFile("html/templates/api/v1/error.html")
+			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
+			return
+		}
 		content, _ := ioutil.ReadAll(r.Body)
-		response_code, err := processData(id, string(content))
+		response_code, err := processData(id[0], string(content))
 		if err != nil {
 			logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
 		}
