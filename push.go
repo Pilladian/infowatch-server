@@ -1,6 +1,7 @@
 package infowatch_server
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +17,12 @@ import (
 //	802 : Server could not read from given project
 //	803 : Server could not write data to project
 //	804 : Server could not create new project
+//	805 : Unrecognized ID format
 func processData(project_id string, content string) (int, error) {
+	if project_id == "" {
+		return 805, errors.New(fmt.Sprintf("Unrecognized ID format \"%s\"", project_id))
+	}
+
 	path := PATH + "/data/" + project_id
 
 	project_exists, err := exists(path)
