@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/Pilladian/logger"
 )
@@ -33,10 +32,8 @@ func main() {
 
 	// handle web server errors
 	if errors.Is(server_err, http.ErrServerClosed) {
-		logger.Error("web server closed\n")
-		os.Exit(1)
+		logger.Fatal("web server closed\n")
 	} else if server_err != nil {
-		logger.Error(fmt.Sprintf("error starting web server: %s\n", server_err))
-		os.Exit(1)
+		logger.Fatal(fmt.Sprintf("error starting web server: %s\n", server_err))
 	}
 }
