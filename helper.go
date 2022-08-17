@@ -1,4 +1,4 @@
-package infowatch_server
+package main
 
 import (
 	"fmt"
