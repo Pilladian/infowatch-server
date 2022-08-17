@@ -17,6 +17,7 @@ func initialize() {
 	createPath(PATH)
 	createPath(PATH + "/data")
 	createPath(PATH + "/logs")
+	logger.SetLogFilename("./infowatch/logs/main.log")
 }
 
 func main() {
