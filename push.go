@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +19,7 @@ import (
 //	803 : Server could not write data to project
 //	804 : Server could not create new project
 //	805 : Unrecognized ID format
+//	806 : Unknown type in json data
 func processData(project_id string, content string) (int, error) {
 	if project_id == "" {
 		return 805, errors.New(fmt.Sprintf("Unrecognized ID format \"%s\"", project_id))
@@ -26,6 +28,7 @@ func processData(project_id string, content string) (int, error) {
 	path := PATH + "/data/" + project_id
 
 	project_exists, err := exists(path)
+	fmt.Println(path)
 	if err != nil {
 		return 801, err
 	}
@@ -35,6 +38,33 @@ func processData(project_id string, content string) (int, error) {
 		if err != nil {
 			return 804, err
 		}
+	}
+
+	if !project_exists {
+		var json_content map[string]interface{}
+		json.Unmarshal([]byte(content), &json_content)
+
+		json_schema := make(map[string]interface{})
+		for k, v := range json_content {
+			switch v.(type) {
+			case string:
+				json_schema[k] = ""
+			case int:
+				json_schema[k] = 0
+			case float32:
+				json_schema[k] = 0
+			case float64:
+				json_schema[k] = 0
+			default:
+				return 806, errors.New("Unknown type for json data")
+			}
+		}
+
+		file, _ := json.MarshalIndent(json_schema, "", " ")
+		_ = ioutil.WriteFile(path+"/schema.json", file, 0700)
+
+	} else {
+		// TODO: check content for schema
 	}
 
 	files, err := ioutil.ReadDir(path)
