@@ -13,3 +13,11 @@ func validateID(id string) error {
 	}
 	return nil
 }
+
+func validateData(data string) error {
+	re, _ := regexp.Compile(` \{((\d+|"\w+") *: *(\d+|"\w+") *, *)*(\d+|"\w+") *: *(\d+|"\w+")\} `)
+	if !re.Match([]byte(fmt.Sprintf(" %s ", data))) {
+		return errors.New("data did not match json format or contained invalid characters")
+	}
+	return nil
+}

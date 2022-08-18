@@ -106,6 +106,11 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if data_err := validateData(string(data)); data_err != nil {
+			logger.Error(fmt.Sprintf("Data validation failed: %s", data_err.Error()))
+			return
+		}
+
 		response_code, err := processData(id[0], string(data))
 		if err != nil {
 			logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
