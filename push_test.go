@@ -2,43 +2,175 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
 )
 
+// ------------------- Template -------------------
+// func TestProcessData_EmptyID(t *testing.T) {
+// 	rand.Seed(time.Now().UnixNano())
+// 	initialize()
+
+// 	// Input
+// 	input := make(map[string]string)
+// 	input["id"] = ""
+// 	input["data"] = "{\"test\": \"test\"}"
+
+// 	// Expectation
+// 	ret_expect_01 := EXPECTATION_01
+// 	ret_expect_02 := EXPECTATION_02
+
+// 	// Run test
+// 	ret_actual_01, ret_actual_02 := TESTING_PROCEDURE(input["id"], input["data"])
+
+// 	// Evaluate test
+// 	if ret_expect_01 == nil && ret_actual_01 == nil {
+// 		// OK
+// 	} else if ret_expect_01 == nil && ret_actual_01 != nil {
+// 		t.Errorf(prettify("<nil>", ret_actual_01))
+// 	} else if ret_expect_01 != nil && ret_actual_01 == nil {
+// 		t.Errorf(prettify(ret_expect_01, "<nil>"))
+// 	} else if ret_expect_01 != ret_actual_01 {
+// 		t.Errorf(prettify(ret_expect_01, ret_actual_01))
+// 	}
+
+// 	if ret_expect_02 == nil && ret_actual_02 == nil {
+// 		// OK
+// 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
+// 		t.Errorf(prettify("<nil>", ret_actual_02))
+// 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
+// 		t.Errorf(prettify(ret_expect_02, "<nil>"))
+// 	} else if ret_expect_02 != ret_actual_02 {
+// 		t.Errorf(prettify(ret_expect_02, ret_actual_02))
+// 	}
+// }
+
 func TestProcessData_EmptyID(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	initialize()
 
-	got, err_got := processData("", "{\"test\": \"test\"}")
-	want := 805
-	err_want := errors.New("Unrecognized ID format \"\"")
+	// Input
+	input := make(map[string]string)
+	input["id"] = ""
+	input["data"] = "{\"test\": \"test\"}"
 
-	if got != want {
-		t.Errorf("[ WANTED ] %d\n\t     [ ACTUAL ] %d\n\n", want, got)
+	// Expectation
+	ret_expect_01 := 805
+	ret_expect_02 := errors.New("Unrecognized ID format \"\"")
+
+	// Run test
+	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
+
+	// Evaluate test
+	if ret_expect_01 != ret_actual_01 {
+		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
-	if err_got == nil {
-		t.Errorf("[ WANTED ] %s\n\t     [ ACTUAL ] <nil>", err_want.Error())
-	} else if err_got.Error() != err_want.Error() {
-		t.Errorf("[ WANTED ] %s\n\t     [ ACTUAL ] %s", err_want.Error(), err_got.Error())
+
+	if ret_expect_02 == nil && ret_actual_02 == nil {
+		// OK
+	} else if ret_expect_02 == nil && ret_actual_02 != nil {
+		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+	} else if ret_expect_02 != nil && ret_actual_02 == nil {
+		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+	} else if ret_expect_02.Error() != ret_actual_02.Error() {
+		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
 
-func TestProcessData_UnknownJsonType(t *testing.T) {
+func TestProcessData_JSONParseError_01(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	initialize()
 
-	got, err_got := processData("test_"+randomString(10), "{\"test\": -}")
-	want := 806
-	err_want := errors.New("Unknown type for json data")
+	// Input
+	input := make(map[string]string)
+	input["id"] = "test_" + randomString(10)
+	input["data"] = "{\"test\": -}"
 
-	if got != want {
-		t.Errorf("[ WANTED ] %d\n\t     [ ACTUAL ] %d\n\n", want, got)
+	// Expectation
+	ret_expect_01 := 807
+	ret_expect_02 := errors.New("Provided json data {\"test\": -} could not be parsed")
+
+	// Run test
+	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
+
+	// Evaluate test
+	if ret_expect_01 != ret_actual_01 {
+		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
-	if err_got == nil {
-		t.Errorf("[ WANTED ] %s\n\t     [ ACTUAL ] <nil>", err_want.Error())
-	} else if err_got.Error() != err_want.Error() {
-		t.Errorf("[ WANTED ] %s\n\t     [ ACTUAL ] %s", err_want.Error(), err_got.Error())
+
+	if ret_expect_02 == nil && ret_actual_02 == nil {
+		// OK
+	} else if ret_expect_02 == nil && ret_actual_02 != nil {
+		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+	} else if ret_expect_02 != nil && ret_actual_02 == nil {
+		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+	} else if ret_expect_02.Error() != ret_actual_02.Error() {
+		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+	}
+}
+
+func TestProcessData_JSONParseError_02(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+	initialize()
+
+	// Input
+	input := make(map[string]string)
+	input["id"] = "test_" + randomString(10)
+	input["data"] = "{\"test\": -, \"test2\": 444}"
+
+	// Expectation
+	ret_expect_01 := 807
+	ret_expect_02 := errors.New("Provided json data {\"test\": -, \"test2\": 444} could not be parsed")
+
+	// Run test
+	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
+
+	// Evaluate test
+	if ret_expect_01 != ret_actual_01 {
+		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+	}
+
+	if ret_expect_02 == nil && ret_actual_02 == nil {
+		// OK
+	} else if ret_expect_02 == nil && ret_actual_02 != nil {
+		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+	} else if ret_expect_02 != nil && ret_actual_02 == nil {
+		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+	} else if ret_expect_02.Error() != ret_actual_02.Error() {
+		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+	}
+}
+
+func TestProcessData_JSONParseError_03(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+	initialize()
+
+	// Input
+	input := make(map[string]string)
+	input["id"] = "test_" + randomString(10)
+	input["data"] = "{\"test\": \"-\", \"test2\": 444}"
+
+	// Expectation
+	ret_expect_01 := 0
+	var ret_expect_02 error
+
+	// Run test
+	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
+
+	// Evaluate test
+	if ret_expect_01 != ret_actual_01 {
+		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+	}
+
+	if ret_expect_02 == nil && ret_actual_02 == nil {
+		// OK
+	} else if ret_expect_02 == nil && ret_actual_02 != nil {
+		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+	} else if ret_expect_02 != nil && ret_actual_02 == nil {
+		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+	} else if ret_expect_02.Error() != ret_actual_02.Error() {
+		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
