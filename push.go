@@ -99,8 +99,14 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
 			return
 		}
-		content, _ := ioutil.ReadAll(r.Body)
-		response_code, err := processData(id[0], string(content))
+		data, _ := ioutil.ReadAll(r.Body)
+
+		if id_err := validateID(id[0]); id_err != nil {
+			logger.Error(fmt.Sprintf("ID validation failed: %s", id_err.Error()))
+			return
+		}
+
+		response_code, err := processData(id[0], string(data))
 		if err != nil {
 			logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
 		}
