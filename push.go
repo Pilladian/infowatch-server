@@ -20,6 +20,7 @@ import (
 //	804 : Server could not create new project
 //	805 : Unrecognized ID format
 //	806 : Unknown type in json data
+//	807 : Provided json data could not be parsed
 func processData(project_id string, content string) (int, error) {
 	if project_id == "" {
 		return 805, errors.New(fmt.Sprintf("Unrecognized ID format \"%s\"", project_id))
@@ -28,7 +29,6 @@ func processData(project_id string, content string) (int, error) {
 	path := PATH + "/data/" + project_id
 
 	project_exists, err := exists(path)
-	fmt.Println(path)
 	if err != nil {
 		return 801, err
 	}
@@ -43,6 +43,9 @@ func processData(project_id string, content string) (int, error) {
 	if !project_exists {
 		var json_content map[string]interface{}
 		json.Unmarshal([]byte(content), &json_content)
+		if json_content == nil {
+			return 807, errors.New(fmt.Sprintf("Provided json data %s could not be parsed", content))
+		}
 
 		json_schema := make(map[string]interface{})
 		for k, v := range json_content {
