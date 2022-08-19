@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Pilladian/go-helper"
 	"github.com/Pilladian/logger"
 )
 
@@ -21,6 +22,8 @@ import (
 //	805 : Unrecognized ID format
 //	806 : Unknown type in json data
 //	807 : Provided json data could not be parsed
+//	808 : Schema file could not be opened
+//	809 : Provided JSON data has invalid schema
 func processData(project_id string, content string) (int, error) {
 	if project_id == "" {
 		return 805, errors.New(fmt.Sprintf("Unrecognized ID format \"%s\"", project_id))
@@ -28,7 +31,7 @@ func processData(project_id string, content string) (int, error) {
 
 	path := PATH + "/data/" + project_id
 
-	project_exists, err := exists(path)
+	project_exists, err := helper.Exists(path)
 	if err != nil {
 		return 801, err
 	}
@@ -42,9 +45,9 @@ func processData(project_id string, content string) (int, error) {
 
 	if !project_exists {
 		var json_content map[string]interface{}
-		json.Unmarshal([]byte(content), &json_content)
+		json_parse_err := json.Unmarshal([]byte(content), &json_content)
 		if json_content == nil {
-			return 807, errors.New(fmt.Sprintf("Provided json data %s could not be parsed", content))
+			return 807, errors.New(fmt.Sprintf("Provided json data %s could not be parsed : %s", content, json_parse_err.Error()))
 		}
 
 		json_schema := make(map[string]interface{})
@@ -67,7 +70,10 @@ func processData(project_id string, content string) (int, error) {
 		_ = ioutil.WriteFile(path+"/schema.json", file, 0700)
 
 	} else {
-		// TODO: check content for schema
+		valid_schema_err := validateSchema(path, content)
+		if valid_schema_err != nil {
+			return 809, valid_schema_err
+		}
 	}
 
 	files, err := ioutil.ReadDir(path)
@@ -114,9 +120,11 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 		response_code, err := processData(id[0], string(data))
 		if err != nil {
 			logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
+			fmt.Fprintf(w, "error\n")
+			return
 		}
 	} else {
 		fmt.Fprintf(w, "denied\n")
 	}
-
+	fmt.Fprintf(w, "success\n")
 }

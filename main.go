@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Pilladian/go-helper"
 	"github.com/Pilladian/logger"
 )
 
@@ -14,9 +15,9 @@ var PATH string = "./infowatch"
 var LEN_FILE_ID int = 30
 
 func initialize() {
-	createPath(PATH)
-	createPath(PATH + "/data")
-	createPath(PATH + "/logs")
+	helper.CreatePath(PATH)
+	helper.CreatePath(PATH + "/data")
+	helper.CreatePath(PATH + "/logs")
 	logger.SetLogFilename("./infowatch/logs/main.log")
 }
 

@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/Pilladian/go-helper"
 )
 
 // ------------------- Template -------------------
@@ -85,12 +87,12 @@ func TestProcessData_JSONParseError_01(t *testing.T) {
 
 	// Input
 	input := make(map[string]string)
-	input["id"] = "test_" + randomString(10)
+	input["id"] = "test_" + helper.RandomString(10)
 	input["data"] = "{\"test\": -}"
 
 	// Expectation
 	ret_expect_01 := 807
-	ret_expect_02 := errors.New("Provided json data {\"test\": -} could not be parsed")
+	ret_expect_02 := errors.New("Provided json data {\"test\": -} could not be parsed : invalid character '}' in numeric literal")
 
 	// Run test
 	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
@@ -117,12 +119,12 @@ func TestProcessData_JSONParseError_02(t *testing.T) {
 
 	// Input
 	input := make(map[string]string)
-	input["id"] = "test_" + randomString(10)
+	input["id"] = "test_" + helper.RandomString(10)
 	input["data"] = "{\"test\": -, \"test2\": 444}"
 
 	// Expectation
 	ret_expect_01 := 807
-	ret_expect_02 := errors.New("Provided json data {\"test\": -, \"test2\": 444} could not be parsed")
+	ret_expect_02 := errors.New("Provided json data {\"test\": -, \"test2\": 444} could not be parsed : invalid character ',' in numeric literal")
 
 	// Run test
 	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
@@ -149,7 +151,7 @@ func TestProcessData_JSONParseError_03(t *testing.T) {
 
 	// Input
 	input := make(map[string]string)
-	input["id"] = "test_" + randomString(10)
+	input["id"] = "test_" + helper.RandomString(10)
 	input["data"] = "{\"test\": \"-\", \"test2\": 444}"
 
 	// Expectation
