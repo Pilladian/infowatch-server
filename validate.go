@@ -37,7 +37,7 @@ func validateSchema(path string, content string) error {
 	var content_json map[string]interface{}
 	json.Unmarshal([]byte(content), &content_json)
 
-	for key, _ := range content_json {
+	for key := range content_json {
 		if !(reflect.TypeOf((content_json[key])) == reflect.TypeOf(schema[key])) {
 			return errors.New("Provided data does not match current schema")
 		}
