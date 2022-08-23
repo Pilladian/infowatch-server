@@ -104,7 +104,7 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		id := r.URL.Query()["id"]
 		if len(id) != 1 {
-			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?id=SOME_ID", r.Host, r.URL.Path))
+			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
 			content, _ := os.ReadFile("html/templates/api/v1/error.html")
 			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
 			return
