@@ -2,6 +2,7 @@
 An open source, noSQL SIEM solution which is implemented in Go
 
 ## Installation
+### GoLang Build
 ```bash
 # Clone the repository from Github
 git clone https://github.com/Pilladian/infowatch-server.git
@@ -9,6 +10,19 @@ git clone https://github.com/Pilladian/infowatch-server.git
 # Build the application
 cd infowatch-server
 go build -o infowatch-server
+```
+
+### Docker
+```bash
+# Clone the repository from Github
+git clone https://github.com/Pilladian/infowatch-server.git
+
+# Build the docker image
+cd infowatch-server
+docker build -t infowatch:latest -f Dockerfile .
+
+# Start the container
+docker run --rm -p 8080:8080 -d infowatch:latest --name iw
 ```
 
 ## Usage
