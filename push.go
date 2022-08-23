@@ -95,12 +95,16 @@ func processData(project_id string, content string) (int, error) {
 
 func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" || r.Method == "HEAD" {
-		content, _ := os.ReadFile("html/templates/api/v1/doc.html")
+		content, os_read_err := os.ReadFile("html/templates/api/v1/doc.html")
+		if os_read_err != nil {
+			logger.Error(fmt.Sprintf("cannot access file doc.html : %s", os_read_err.Error()))
+		}
 		fmt.Fprintf(w, string(content))
+		return
 	} else if r.Method == "POST" {
 		id := r.URL.Query()["id"]
 		if len(id) != 1 {
-			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
+			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?id=SOME_ID", r.Host, r.URL.Path))
 			content, _ := os.ReadFile("html/templates/api/v1/error.html")
 			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
 			return
@@ -126,5 +130,4 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "denied\n")
 	}
-	fmt.Fprintf(w, "success\n")
 }

@@ -15,6 +15,7 @@ var PATH string = "./infowatch"
 var LEN_FILE_ID int = 30
 
 func initialize() {
+	logger.SetLogLevel(2)
 	helper.CreatePath(PATH)
 	helper.CreatePath(PATH + "/data")
 	helper.CreatePath(PATH + "/logs")

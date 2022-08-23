@@ -18,6 +18,8 @@ WORKDIR /tmp/
 
 COPY --from=build /iw /iw
 
+COPY html/ /tmp/html/
+
 EXPOSE 8080
 
 USER nonroot:nonroot
