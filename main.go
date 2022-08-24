@@ -30,6 +30,7 @@ func main() {
 	http.HandleFunc("/", rootRequestHandler)
 	http.HandleFunc("/healthy", healthyRequestHandler)
 	http.HandleFunc("/api/v1/push", pushRequestHandler)
+	http.HandleFunc("/api/v1/query", queryRequestHandler)
 
 	// start web server
 	server_err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
