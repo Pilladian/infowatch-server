@@ -28,6 +28,7 @@ func main() {
 
 	// http request handler
 	http.HandleFunc("/", rootRequestHandler)
+	http.HandleFunc("/healthy", healthyRequestHandler)
 	http.HandleFunc("/api/v1/push", pushRequestHandler)
 
 	// start web server
