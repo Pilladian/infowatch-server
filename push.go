@@ -36,18 +36,18 @@ func processData(project_id string, content string) (int, error) {
 		return 801, err
 	}
 
+	var json_content map[string]interface{}
+	json_parse_err := json.Unmarshal([]byte(content), &json_content)
+	if json_content == nil {
+		return 807, errors.New(fmt.Sprintf("Provided json data %s could not be parsed : %s", content, json_parse_err.Error()))
+	}
+	content_b, _ := json.MarshalIndent(json_content, "", " ")
+	content = string(content_b)
+
 	if !project_exists {
 		err := os.Mkdir(path, 0700)
 		if err != nil {
 			return 804, err
-		}
-	}
-
-	if !project_exists {
-		var json_content map[string]interface{}
-		json_parse_err := json.Unmarshal([]byte(content), &json_content)
-		if json_content == nil {
-			return 807, errors.New(fmt.Sprintf("Provided json data %s could not be parsed : %s", content, json_parse_err.Error()))
 		}
 
 		json_schema := make(map[string]interface{})
