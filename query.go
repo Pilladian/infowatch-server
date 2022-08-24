@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Pilladian/logger"
 )
@@ -25,8 +26,9 @@ func queryAllData(id string) (string, int, error) {
 		return "", 601, dir_read_err
 	}
 
-	for i, f := range files {
+	for _, f := range files {
 		filename := f.Name()
+		key_for_data := strings.Split(filename, ".json")[0]
 		if filename == "schema.json" {
 			continue
 		}
@@ -36,7 +38,7 @@ func queryAllData(id string) (string, int, error) {
 		}
 		var data_f_content map[string]interface{}
 		json.Unmarshal(data_f_b, &data_f_content)
-		data[fmt.Sprintf("%d", i)] = data_f_content
+		data[key_for_data] = data_f_content
 	}
 
 	data_b, _ := json.MarshalIndent(data, "", " ")
