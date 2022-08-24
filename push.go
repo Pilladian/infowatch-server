@@ -95,9 +95,11 @@ func processData(project_id string, content string) (int, error) {
 
 func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" || r.Method == "HEAD" {
-		content, os_read_err := os.ReadFile("html/templates/api/v1/doc.html")
+		content, os_read_err := os.ReadFile("html/templates/api/v1/push.html")
 		if os_read_err != nil {
-			logger.Error(fmt.Sprintf("cannot access file doc.html : %s", os_read_err.Error()))
+			logger.Error(fmt.Sprintf("cannot access file push.html : %s", os_read_err.Error()))
+			fmt.Fprintf(w, "error\n")
+			return
 		}
 		fmt.Fprintf(w, string(content))
 		return
@@ -113,11 +115,13 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 		if id_err := validateID(id[0]); id_err != nil {
 			logger.Error(fmt.Sprintf("ID validation failed: %s", id_err.Error()))
+			fmt.Fprintf(w, "error\n")
 			return
 		}
 
 		if data_err := validateData(string(data)); data_err != nil {
 			logger.Error(fmt.Sprintf("Data validation failed: %s", data_err.Error()))
+			fmt.Fprintf(w, "error\n")
 			return
 		}
 
@@ -127,6 +131,7 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "error\n")
 			return
 		}
+		fmt.Fprintf(w, "success\n")
 	} else {
 		fmt.Fprintf(w, "denied\n")
 	}
