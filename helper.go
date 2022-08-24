@@ -14,6 +14,10 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<h1>Hello There!</h1><p>This is the main page.</p>")
 }
 
+func healthyRequestHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "running")
+}
+
 func uniqueRandomString(id_len int, files []fs.FileInfo) string {
 	cond := true
 	filename := helper.RandomString(id_len)
