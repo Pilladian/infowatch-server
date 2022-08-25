@@ -72,7 +72,6 @@ func processData(project_id string, content string) (int, error) {
 		}
 	}
 	create_table_stmt += ");"
-	logger.Info(fmt.Sprintf("new table created : %s", create_table_stmt))
 	_, create_table_err := db.Exec(create_table_stmt)
 	if create_table_err != nil {
 		return 805, fmt.Errorf("Unable to create table in database : %s", create_table_err.Error())
@@ -110,6 +109,7 @@ func processData(project_id string, content string) (int, error) {
 
 func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" || r.Method == "HEAD" {
+		logger.Info(fmt.Sprintf("push API received a %s Request", r.Method))
 		content, os_read_err := os.ReadFile("html/templates/api/v1/push.html")
 		if os_read_err != nil {
 			logger.Error(fmt.Sprintf("cannot access file push.html : %s", os_read_err.Error()))
@@ -146,8 +146,10 @@ func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "error\n")
 			return
 		}
+		logger.Info(fmt.Sprintf("successfully pushed data to server - project : %s", pid))
 		fmt.Fprintf(w, "success\n")
 	} else {
+		logger.Warning(fmt.Sprintf("push API received a %s Request", r.Method))
 		fmt.Fprintf(w, "denied\n")
 	}
 }

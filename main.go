@@ -16,7 +16,6 @@ var DATABASE_NAME string = "infowatch.db"
 var LEN_FILE_ID int = 30
 
 func initialize() {
-	logger.SetLogLevel(2)
 	helper.CreatePath(PATH)
 	helper.CreatePath(PATH + "/data")
 	helper.CreatePath(PATH + "/logs")
@@ -25,15 +24,20 @@ func initialize() {
 
 func main() {
 	// initialize environment
+	logger.SetLogLevel(2)
+	logger.Info("--------------------------------- Starting InfoWatch ---------------------------------")
+	logger.Info("initialize environment")
 	initialize()
 
 	// http request handler
+	logger.Info("setup http request handler")
 	http.HandleFunc("/", rootRequestHandler)
 	http.HandleFunc("/healthy", healthyRequestHandler)
 	http.HandleFunc("/api/v1/push", pushRequestHandler)
 	http.HandleFunc("/api/v1/query", queryRequestHandler)
 
 	// start web server
+	logger.Info("start http server")
 	server_err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
 
 	// handle web server errors

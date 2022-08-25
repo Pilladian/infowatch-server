@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"net/http"
-
-	"github.com/Pilladian/go-helper"
 )
 
 // --------------------------------- Main ---------------------------------
@@ -16,25 +13,6 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 func healthyRequestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "running")
-}
-
-func uniqueRandomString(id_len int, files []fs.FileInfo) string {
-	cond := true
-	filename := helper.RandomString(id_len)
-	for cond {
-		unique := true
-		for _, f := range files {
-			if filename == f.Name() {
-				unique = false
-			}
-		}
-		if !unique {
-			filename = helper.RandomString(id_len)
-		} else {
-			cond = false
-		}
-	}
-	return filename
 }
 
 // --------------------------------- Testing ---------------------------------
