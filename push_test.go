@@ -31,21 +31,21 @@ import (
 // 	if ret_expect_01 == nil && ret_actual_01 == nil {
 // 		// OK
 // 	} else if ret_expect_01 == nil && ret_actual_01 != nil {
-// 		t.Errorf(prettify("<nil>", ret_actual_01))
+// 		t.Errorf(helper.Prettify("<nil>", ret_actual_01))
 // 	} else if ret_expect_01 != nil && ret_actual_01 == nil {
-// 		t.Errorf(prettify(ret_expect_01, "<nil>"))
+// 		t.Errorf(helper.Prettify(ret_expect_01, "<nil>"))
 // 	} else if ret_expect_01 != ret_actual_01 {
-// 		t.Errorf(prettify(ret_expect_01, ret_actual_01))
+// 		t.Errorf(helper.Prettify(ret_expect_01, ret_actual_01))
 // 	}
 
 // 	if ret_expect_02 == nil && ret_actual_02 == nil {
 // 		// OK
 // 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
-// 		t.Errorf(prettify("<nil>", ret_actual_02))
+// 		t.Errorf(helper.Prettify("<nil>", ret_actual_02))
 // 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
-// 		t.Errorf(prettify(ret_expect_02, "<nil>"))
+// 		t.Errorf(helper.Prettify(ret_expect_02, "<nil>"))
 // 	} else if ret_expect_02 != ret_actual_02 {
-// 		t.Errorf(prettify(ret_expect_02, ret_actual_02))
+// 		t.Errorf(helper.Prettify(ret_expect_02, ret_actual_02))
 // 	}
 // }
 
@@ -67,17 +67,17 @@ func TestProcessData_EmptyID(t *testing.T) {
 
 	// Evaluate test
 	if ret_expect_01 != ret_actual_01 {
-		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+		t.Errorf(helper.Prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
 
 	if ret_expect_02 == nil && ret_actual_02 == nil {
 		// OK
 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
-		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+		t.Errorf(helper.Prettify("<nil>", ret_actual_02.Error()))
 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
-		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), "<nil>"))
 	} else if ret_expect_02.Error() != ret_actual_02.Error() {
-		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
 
@@ -99,17 +99,17 @@ func TestProcessData_JSONParseError_01(t *testing.T) {
 
 	// Evaluate test
 	if ret_expect_01 != ret_actual_01 {
-		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+		t.Errorf(helper.Prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
 
 	if ret_expect_02 == nil && ret_actual_02 == nil {
 		// OK
 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
-		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+		t.Errorf(helper.Prettify("<nil>", ret_actual_02.Error()))
 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
-		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), "<nil>"))
 	} else if ret_expect_02.Error() != ret_actual_02.Error() {
-		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
 
@@ -131,17 +131,17 @@ func TestProcessData_JSONParseError_02(t *testing.T) {
 
 	// Evaluate test
 	if ret_expect_01 != ret_actual_01 {
-		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+		t.Errorf(helper.Prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
 
 	if ret_expect_02 == nil && ret_actual_02 == nil {
 		// OK
 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
-		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+		t.Errorf(helper.Prettify("<nil>", ret_actual_02.Error()))
 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
-		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), "<nil>"))
 	} else if ret_expect_02.Error() != ret_actual_02.Error() {
-		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
 
@@ -163,16 +163,16 @@ func TestProcessData_JSONParseError_03(t *testing.T) {
 
 	// Evaluate test
 	if ret_expect_01 != ret_actual_01 {
-		t.Errorf(prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
+		t.Errorf(helper.Prettify(fmt.Sprint(ret_expect_01), fmt.Sprint(ret_actual_01)))
 	}
 
 	if ret_expect_02 == nil && ret_actual_02 == nil {
 		// OK
 	} else if ret_expect_02 == nil && ret_actual_02 != nil {
-		t.Errorf(prettify("<nil>", ret_actual_02.Error()))
+		t.Errorf(helper.Prettify("<nil>", ret_actual_02.Error()))
 	} else if ret_expect_02 != nil && ret_actual_02 == nil {
-		t.Errorf(prettify(ret_expect_02.Error(), "<nil>"))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), "<nil>"))
 	} else if ret_expect_02.Error() != ret_actual_02.Error() {
-		t.Errorf(prettify(ret_expect_02.Error(), ret_actual_02.Error()))
+		t.Errorf(helper.Prettify(ret_expect_02.Error(), ret_actual_02.Error()))
 	}
 }
