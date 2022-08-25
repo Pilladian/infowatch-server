@@ -94,6 +94,7 @@ func query(db *sql.DB, stmt string) (string, map[int64]map[string]interface{}, i
 
 func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" || r.Method == "HEAD" {
+		logger.Info(fmt.Sprintf("query API received a %s Request", r.Method))
 		content, os_read_err := os.ReadFile("html/templates/api/v1/query.html")
 		if os_read_err != nil {
 			logger.Error(fmt.Sprintf("cannot access file query.html : %s", os_read_err.Error()))
@@ -122,5 +123,9 @@ func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprintf(w, data+"\n")
+		logger.Info(fmt.Sprintf("successfully queried data from server - project : %s", pid))
+	} else {
+		logger.Warning(fmt.Sprintf("query API received a %s Request", r.Method))
+		fmt.Fprintf(w, "denied\n")
 	}
 }
