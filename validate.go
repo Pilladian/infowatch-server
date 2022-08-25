@@ -12,7 +12,7 @@ import (
 )
 
 func validatePID(id string) error {
-	re, _ := regexp.Compile(` \w+ `)
+	re, _ := regexp.Compile(` (\w|_|-)+ `)
 	if !re.Match([]byte(fmt.Sprintf(" %s ", id))) {
 		return errors.New("ID did not match server requirements")
 	}
