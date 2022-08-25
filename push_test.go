@@ -55,15 +55,15 @@ func TestProcessData_EmptyID(t *testing.T) {
 
 	// Input
 	input := make(map[string]string)
-	input["id"] = ""
+	input["pid"] = ""
 	input["data"] = "{\"test\": \"test\"}"
 
 	// Expectation
-	ret_expect_01 := 805
-	ret_expect_02 := errors.New("Unrecognized ID format \"\"")
+	ret_expect_01 := 801
+	ret_expect_02 := errors.New("Unrecognized pid format \"\"")
 
 	// Run test
-	ret_actual_01, ret_actual_02 := processData(input["id"], input["data"])
+	ret_actual_01, ret_actual_02 := processData(input["pid"], input["data"])
 
 	// Evaluate test
 	if ret_expect_01 != ret_actual_01 {
