@@ -12,6 +12,7 @@ import (
 // GLOBAL VARS
 var PORT int = 8080
 var PATH string = "./infowatch"
+var DATABASE_NAME string = "infowatch.db"
 var LEN_FILE_ID int = 30
 
 func initialize() {

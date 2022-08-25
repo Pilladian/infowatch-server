@@ -1,50 +1,95 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 
+	"github.com/Pilladian/go-helper"
 	"github.com/Pilladian/logger"
 )
 
 // Response Codes:
 //
 //	  0 : OK
-//	601 : Could not read content of provided project
-//	602 : Could not read data from specific file inside the project
-func queryAllData(id string) (string, int, error) {
-	path := PATH + "/data/" + id + "/"
-	data := make(map[string]map[string]interface{})
-
-	files, dir_read_err := ioutil.ReadDir(path)
-	if dir_read_err != nil {
-		return "", 601, dir_read_err
+//	601 : Unrecognized pid format
+//	602 : Unable to connect to database
+//	603 : Database does not exist
+//	604 : Unable to perform query
+//	605 : Unable to obtain data from database
+func queryAll(project_id string) (string, int, error) {
+	if project_id == "" {
+		return "", 601, fmt.Errorf("Unrecognized pid format \"%s\"", project_id)
 	}
 
-	for _, f := range files {
-		filename := f.Name()
-		key_for_data := strings.Split(filename, ".json")[0]
-		if filename == "schema.json" {
-			continue
+	db_path := PATH + "/data/" + DATABASE_NAME
+
+	existent, existent_err := helper.Exists(db_path)
+	if existent_err != nil {
+		return "", 602, fmt.Errorf("Unable to connect to database : %s", existent_err.Error())
+	}
+	if !existent {
+		return "", 603, fmt.Errorf("Database does not exist")
+	}
+
+	db, db_open_err := sql.Open("sqlite3", db_path)
+	if db_open_err != nil {
+		return "", 602, fmt.Errorf("Unable to connect to database : %s", db_open_err.Error())
+	}
+	defer db.Close()
+
+	stmt := fmt.Sprintf("SELECT * from \"%s\"", project_id)
+	data_s, _, data_s_err_code, data_s_err := query(db, stmt)
+	if data_s_err != nil {
+		return "", data_s_err_code, data_s_err
+	}
+
+	return data_s, 0, nil
+}
+
+// Response Codes:
+//
+//	  0 : OK
+//	604 : Unable to perform query
+//	605 : Unable to obtain data from database
+func query(db *sql.DB, stmt string) (string, map[int64]map[string]interface{}, int, error) {
+	rows, query_err := db.Query(stmt)
+	if query_err != nil {
+		return "", nil, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
+	}
+	defer rows.Close()
+	cols, _ := rows.Columns()
+	data := make(map[int64]map[string]interface{})
+	for rows.Next() {
+		columns := make([]interface{}, len(cols))
+		columnPointers := make([]interface{}, len(cols))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
 		}
-		data_f_b, data_file_err := ioutil.ReadFile(path + filename)
-		if data_file_err != nil {
-			return "", 602, errors.New(fmt.Sprintf("Could not read data from file \"%s\" : %s", filename, data_file_err))
+
+		if read_data_err := rows.Scan(columnPointers...); read_data_err != nil {
+			return "", nil, 605, fmt.Errorf("Unable to obtain data from database : %s", read_data_err.Error())
 		}
-		var data_f_content map[string]interface{}
-		json.Unmarshal(data_f_b, &data_f_content)
-		data[key_for_data] = data_f_content
+
+		m := make(map[string]interface{})
+		var ind int64
+		for i, colName := range cols {
+			val := *columnPointers[i].(*interface{})
+			if colName == "ID" {
+				ind = val.(int64)
+				continue
+			}
+			m[colName] = val
+		}
+		data[ind] = m
 	}
 
 	data_b, _ := json.MarshalIndent(data, "", " ")
 	data_s := string(data_b)
 
-	return data_s, 0, nil
+	return data_s, data, 0, nil
 }
 
 func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,21 +101,21 @@ func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(content))
 		return
 	} else if r.Method == "GET" {
-		id := r.URL.Query()["id"]
-		if len(id) != 1 {
-			logger.Error(fmt.Sprintf("query parameter \"id\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
+		pid := r.URL.Query()["pid"]
+		if len(pid) != 1 {
+			logger.Error(fmt.Sprintf("query parameter \"pid\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
 			content, _ := os.ReadFile("html/templates/api/v1/error.html")
 			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
 			return
 		}
 
-		if id_err := validateID(id[0]); id_err != nil {
-			logger.Error(fmt.Sprintf("ID validation failed: %s", id_err.Error()))
+		if id_err := validatePID(pid[0]); id_err != nil {
+			logger.Error(fmt.Sprintf("pid validation failed: %s", id_err.Error()))
 			fmt.Fprintf(w, "error\n")
 			return
 		}
 
-		data, query_err_code, query_err := queryAllData(id[0])
+		data, query_err_code, query_err := queryAll(pid[0])
 		if query_err != nil {
 			logger.Error(fmt.Sprintf("Server response code \"%d\" : %s", query_err_code, query_err.Error()))
 			fmt.Fprintf(w, "error\n")
