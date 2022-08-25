@@ -24,7 +24,7 @@ func queryAllData(project_id string) (string, int, error) {
 		return "", 601, fmt.Errorf("Unrecognized pid format \"%s\"", project_id)
 	}
 
-	db_path := PATH + "/data/test.db"
+	db_path := PATH + "/data/" + DATABASE_NAME
 
 	existent, existent_err := helper.Exists(db_path)
 	if existent_err != nil {
