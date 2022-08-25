@@ -1,5 +1,5 @@
 # InfoWatch
-An open source, noSQL SIEM solution which is implemented in Go
+An open source SIEM solution implemented in Go
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Pilladian/infowatch-server)
 ![GitHub](https://img.shields.io/github/license/Pilladian/infowatch-server)
@@ -16,7 +16,7 @@ git clone https://github.com/Pilladian/infowatch-server.git
 
 # Build the application
 cd infowatch-server
-go build -o infowatch-server
+go build -o iw-server
 ```
 
 ### Docker
@@ -29,14 +29,20 @@ cd infowatch-server
 docker build -t infowatch:latest -f Dockerfile .
 
 # Start the container
-docker run --rm -p 8080:8080 -d infowatch:latest --name iw
+docker run --rm -p 8080:8080 -d infowatch:latest
 ```
 
 ## Usage
 ```bash
-# Create new project 823745 and store some json data in it
-curl http://localhost:8080/api/v1/push?id=823745 -X POST -d '{"id": "abcdef", "text": "hello, its me"}'
+# Create new project 823745 and store some data in it
+curl http://localhost:8080/api/v1/push?pid=823745 -X POST -d '{"sender": "me", "message": "hello_its_me"}'
 
-# Add json data to project 823745
-curl http://localhost:8080/api/v1/push?id=823745 -X POST -d '{"id": "ghijkl", "text": "hello, its me again"}'
+# Add data to project 823745
+curl http://localhost:8080/api/v1/push?pid=823745 -X POST -d '{"sender": "you", "message": "hello_me_its_you"}'
+
+# Query data from project 823745
+curl http://localhost:8080/api/v1/query?pid=823745
 ```
+
+## Important Notes
+`"id"`, `"Id"`, `"iD"` or `"ID"` are invalid keys for json data
