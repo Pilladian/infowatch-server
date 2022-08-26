@@ -37,6 +37,8 @@ func main() {
 	http.HandleFunc("/view", viewRequestHandler)
 	http.HandleFunc("/healthy", healthyRequestHandler)
 	http.HandleFunc("/api/v1/push", pushRequestHandler)
+	fs := http.FileServer(http.Dir("./html/main"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// start web server
 	logger.Info("start http server")

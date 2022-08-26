@@ -4,8 +4,9 @@ import (
 	"sort"
 )
 
-func getQueryForTemplate(data_json map[int64]map[string]interface{}) Query {
+func getQueryForTemplate(pid string, data_json map[int64]map[string]interface{}) Query {
 	q := Query{}
+	q.ProjectID = pid
 	m := []string{"ID"}
 	for i := range data_json[int64(1)] {
 		m = append(m, i)
@@ -17,7 +18,9 @@ func getQueryForTemplate(data_json map[int64]map[string]interface{}) Query {
 	for a, b := range data_json {
 		tmp := []interface{}{a}
 		for _, i := range m {
-			tmp = append(tmp, b[i])
+			if i != "ID" {
+				tmp = append(tmp, b[i])
+			}
 		}
 		m2 = append(m2, tmp)
 	}

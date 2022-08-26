@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <head>
-    <h2>InfoWatch</h2>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <section class="container">
+        <br>
+        <h1>InfoWatch</h1>
+        <br>
         <lu>
-
             {{ range. }}
             <li><a href="/view?pid={{ . }}">{{ . }}</a></li><br>
             {{ end }}

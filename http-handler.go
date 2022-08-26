@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/Pilladian/logger"
 )
@@ -126,7 +127,10 @@ func viewRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		t, t_err := template.ParseFiles("html/templates/root/results.html")
+		//t, t_err := template.ParseFiles("html/main/results.html")
+		lp := filepath.Join("html/main", "results.html")
+		fp := filepath.Join("html/main", "css/styles.css")
+		t, t_err := template.ParseFiles(lp, fp)
 		if t_err != nil {
 			logger.Error(t_err.Error())
 			fmt.Fprintf(w, "error\n")
@@ -147,7 +151,7 @@ func viewRequestHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "error\n")
 			return
 		}
-		q := getQueryForTemplate(data)
+		q := getQueryForTemplate(pid[0], data)
 		t.Execute(w, q)
 		logger.Info(fmt.Sprintf("successfully viewed server data - project : %s", pid[0]))
 	} else {
@@ -161,7 +165,7 @@ func viewRequestHandler(w http.ResponseWriter, r *http.Request) {
 // ----------------------------------------------------------------------------------
 
 func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("html/templates/root/index.html")
+	t, _ := template.ParseFiles("html/main/index.html")
 
 	db, db_err := openDB()
 	if db_err != nil {
