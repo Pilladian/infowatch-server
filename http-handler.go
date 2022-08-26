@@ -175,11 +175,11 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	table_names, query_err_code, query_err := queryDatabaseTables(db)
+	tq, query_err_code, query_err := queryDatabaseTables(db)
 	if query_err != nil {
 		logger.Error(fmt.Sprintf("Server response code \"%d\" : %s", query_err_code, query_err.Error()))
 		fmt.Fprintf(w, "error\n")
 		return
 	}
-	t.Execute(w, table_names)
+	t.Execute(w, tq)
 }
