@@ -40,8 +40,8 @@ curl http://localhost:8080/api/v1/push?pid=823745 -X POST -d '{"sender": "me", "
 # Add data to project 823745
 curl http://localhost:8080/api/v1/push?pid=823745 -X POST -d '{"sender": "you", "message": "hello_me_its_you"}'
 
-# Query data from project 823745
-curl http://localhost:8080/api/v1/query?pid=823745
+# View data
+curl http://localhost:8080/
 ```
 
 ## Important Notes
