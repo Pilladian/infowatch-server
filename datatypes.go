@@ -1,6 +1,7 @@
 package main
 
 type Query struct {
-	Header []string
-	Rows   [][]interface{}
+	ProjectID string
+	Header    []string
+	Rows      [][]interface{}
 }
