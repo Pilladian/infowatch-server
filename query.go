@@ -56,22 +56,68 @@ func queryDatabaseProject(db *sql.DB, stmt string) (string, map[int64]map[string
 //	  0 : OK
 //	604 : Unable to perform queryDatabase
 //	605 : Unable to obtain data from database
-func queryDatabaseTables(db *sql.DB) ([]string, int, error) {
+//	606 : Unable to obtain amount of entries from database
+//	607 : Unable to obtain amount of columns from database
+func queryDatabaseTables(db *sql.DB) (TableQuery, int, error) {
+	tq := TableQuery{}
+	tq.Header = append(tq.Header, "Table")
+	tq.Header = append(tq.Header, "Entries")
+	tq.Header = append(tq.Header, "Columns")
+
 	rows, query_err := db.Query("SELECT name FROM sqlite_schema WHERE type IN ('table','view')	AND name NOT LIKE 'sqlite_%';")
 	if query_err != nil {
-		return nil, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
+		return TableQuery{}, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
 	}
 	defer rows.Close()
 
-	data := []string{}
+	tables := []string{}
 	for rows.Next() {
 		var tmp string
 		if read_data_err := rows.Scan(&tmp); read_data_err != nil {
-			return nil, 605, fmt.Errorf("Unable to obtain table names from database : %s", read_data_err.Error())
+			return TableQuery{}, 605, fmt.Errorf("Unable to obtain table names from database : %s", read_data_err.Error())
 		}
-		data = append(data, tmp)
+		tables = append(tables, tmp)
 	}
-	return data, 0, nil
+
+	entries := []int{}
+	for _, table := range tables {
+		rows, query_err := db.Query(fmt.Sprintf("SELECT COUNT(*) FROM \"%s\"", table))
+		if query_err != nil {
+			return TableQuery{}, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
+		}
+		defer rows.Close()
+		var tmp int
+		for rows.Next() {
+			if read_data_err := rows.Scan(&tmp); read_data_err != nil {
+				return TableQuery{}, 606, fmt.Errorf("Unable to obtain amount of entries from database : %s", read_data_err.Error())
+			}
+		}
+		entries = append(entries, tmp)
+	}
+
+	columns := []int{}
+	for _, table := range tables {
+		rows, query_err := db.Query(fmt.Sprintf("SELECT * FROM \"%s\"", table))
+		if query_err != nil {
+			return TableQuery{}, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
+		}
+		defer rows.Close()
+		tmp, tmp_err := rows.Columns()
+		if tmp_err != nil {
+			return TableQuery{}, 607, fmt.Errorf("Unable to obtain amount of columns from database : %s", tmp_err.Error())
+		}
+		columns = append(columns, len(tmp))
+	}
+
+	for i := 0; i < len(tables); i++ {
+		var tmp TableRowQuery
+		tmp.Name = tables[i]
+		tmp.AmountEntries = entries[i]
+		tmp.AmountColumns = columns[i]
+		tq.Rows = append(tq.Rows, tmp)
+	}
+
+	return tq, 0, nil
 }
 
 // Response Codes:
