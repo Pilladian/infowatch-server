@@ -17,7 +17,9 @@ func getQueryForTemplate(data_json map[int64]map[string]interface{}) Query {
 	for a, b := range data_json {
 		tmp := []interface{}{a}
 		for _, i := range m {
-			tmp = append(tmp, b[i])
+			if i != "ID" {
+				tmp = append(tmp, b[i])
+			}
 		}
 		m2 = append(m2, tmp)
 	}
