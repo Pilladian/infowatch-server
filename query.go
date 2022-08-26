@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
 
 	"github.com/Pilladian/go-helper"
-	"github.com/Pilladian/logger"
 )
 
 // Response Codes:
@@ -59,7 +56,7 @@ func queryDatabaseProject(db *sql.DB, stmt string) (string, map[int64]map[string
 //	  0 : OK
 //	604 : Unable to perform queryDatabase
 //	605 : Unable to obtain data from database
-func queryDatabaseNames(db *sql.DB) ([]string, int, error) {
+func queryDatabaseTables(db *sql.DB) ([]string, int, error) {
 	rows, query_err := db.Query("SELECT name FROM sqlite_schema WHERE type IN ('table','view')	AND name NOT LIKE 'sqlite_%';")
 	if query_err != nil {
 		return nil, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
@@ -111,42 +108,4 @@ func getAllFromDatabase(project_id string) (string, int, error) {
 	}
 
 	return data_s, 0, nil
-}
-
-func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" || r.Method == "HEAD" {
-		logger.Info(fmt.Sprintf("query API received a %s Request", r.Method))
-		content, os_read_err := os.ReadFile("html/templates/api/v1/query.html")
-		if os_read_err != nil {
-			logger.Error(fmt.Sprintf("cannot access file query.html : %s", os_read_err.Error()))
-		}
-		fmt.Fprintf(w, string(content))
-		return
-	} else if r.Method == "GET" {
-		pid := r.URL.Query()["pid"]
-		if len(pid) != 1 {
-			logger.Error(fmt.Sprintf("query parameter \"pid\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
-			content, _ := os.ReadFile("html/templates/api/v1/error.html")
-			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
-			return
-		}
-
-		if id_err := validatePID(pid[0]); id_err != nil {
-			logger.Error(fmt.Sprintf("pid validation failed: %s", id_err.Error()))
-			fmt.Fprintf(w, "error\n")
-			return
-		}
-
-		data, query_err_code, query_err := getAllFromDatabase(pid[0])
-		if query_err != nil {
-			logger.Error(fmt.Sprintf("Server response code \"%d\" : %s", query_err_code, query_err.Error()))
-			fmt.Fprintf(w, "error\n")
-			return
-		}
-		fmt.Fprintf(w, data+"\n")
-		logger.Info(fmt.Sprintf("successfully queried data from server - project : %s", pid))
-	} else {
-		logger.Warning(fmt.Sprintf("query API received a %s Request", r.Method))
-		fmt.Fprintf(w, "denied\n")
-	}
 }
