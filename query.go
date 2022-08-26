@@ -14,47 +14,9 @@ import (
 // Response Codes:
 //
 //	  0 : OK
-//	601 : Unrecognized pid format
-//	602 : Unable to connect to database
-//	603 : Database does not exist
-//	604 : Unable to perform query
+//	604 : Unable to perform queryDatabaseProject
 //	605 : Unable to obtain data from database
-func queryAll(project_id string) (string, int, error) {
-	if project_id == "" {
-		return "", 601, fmt.Errorf("Unrecognized pid format \"%s\"", project_id)
-	}
-
-	db_path := PATH + "/data/" + DATABASE_NAME
-
-	existent, existent_err := helper.Exists(db_path)
-	if existent_err != nil {
-		return "", 602, fmt.Errorf("Unable to connect to database : %s", existent_err.Error())
-	}
-	if !existent {
-		return "", 603, fmt.Errorf("Database does not exist")
-	}
-
-	db, db_open_err := sql.Open("sqlite3", db_path)
-	if db_open_err != nil {
-		return "", 602, fmt.Errorf("Unable to connect to database : %s", db_open_err.Error())
-	}
-	defer db.Close()
-
-	stmt := fmt.Sprintf("SELECT * from \"%s\"", project_id)
-	data_s, _, data_s_err_code, data_s_err := query(db, stmt)
-	if data_s_err != nil {
-		return "", data_s_err_code, data_s_err
-	}
-
-	return data_s, 0, nil
-}
-
-// Response Codes:
-//
-//	  0 : OK
-//	604 : Unable to perform query
-//	605 : Unable to obtain data from database
-func query(db *sql.DB, stmt string) (string, map[int64]map[string]interface{}, int, error) {
+func queryDatabaseProject(db *sql.DB, stmt string) (string, map[int64]map[string]interface{}, int, error) {
 	rows, query_err := db.Query(stmt)
 	if query_err != nil {
 		return "", nil, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
@@ -92,6 +54,65 @@ func query(db *sql.DB, stmt string) (string, map[int64]map[string]interface{}, i
 	return data_s, data, 0, nil
 }
 
+// Response Codes:
+//
+//	  0 : OK
+//	604 : Unable to perform queryDatabase
+//	605 : Unable to obtain data from database
+func queryDatabaseNames(db *sql.DB) ([]string, int, error) {
+	rows, query_err := db.Query("SELECT name FROM sqlite_schema WHERE type IN ('table','view')	AND name NOT LIKE 'sqlite_%';")
+	if query_err != nil {
+		return nil, 604, fmt.Errorf("Unable to perform query : %s", query_err.Error())
+	}
+	defer rows.Close()
+
+	data := []string{}
+	for rows.Next() {
+		var tmp string
+		if read_data_err := rows.Scan(&tmp); read_data_err != nil {
+			return nil, 605, fmt.Errorf("Unable to obtain table names from database : %s", read_data_err.Error())
+		}
+		data = append(data, tmp)
+	}
+	return data, 0, nil
+}
+
+// Response Codes:
+//
+//	  0 : OK
+//	601 : Unrecognized pid format
+//	602 : Unable to connect to database
+//	603 : Database does not exist
+//	604 : Unable to perform query
+//	605 : Unable to obtain data from database
+func getAllFromDatabase(project_id string) (string, int, error) {
+	if project_id == "" {
+		return "", 601, fmt.Errorf("Unrecognized pid format \"%s\"", project_id)
+	}
+
+	existent, existent_err := helper.Exists(DATABASE_PATH)
+	if existent_err != nil {
+		return "", 602, fmt.Errorf("Unable to connect to database : %s", existent_err.Error())
+	}
+	if !existent {
+		return "", 603, fmt.Errorf("Database does not exist")
+	}
+
+	db, db_err := openDB()
+	if db_err != nil {
+		return "", 602, fmt.Errorf("Unable to connect to database : %s", db_err.Error())
+	}
+	defer db.Close()
+
+	stmt := fmt.Sprintf("SELECT * from \"%s\"", project_id)
+	data_s, _, data_s_err_code, data_s_err := queryDatabaseProject(db, stmt)
+	if data_s_err != nil {
+		return "", data_s_err_code, data_s_err
+	}
+
+	return data_s, 0, nil
+}
+
 func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" || r.Method == "HEAD" {
 		logger.Info(fmt.Sprintf("query API received a %s Request", r.Method))
@@ -116,7 +137,7 @@ func queryRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data, query_err_code, query_err := queryAll(pid[0])
+		data, query_err_code, query_err := getAllFromDatabase(pid[0])
 		if query_err != nil {
 			logger.Error(fmt.Sprintf("Server response code \"%d\" : %s", query_err_code, query_err.Error()))
 			fmt.Fprintf(w, "error\n")

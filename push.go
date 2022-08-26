@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,32 +27,29 @@ func processData(project_id string, content string) (int, error) {
 		return 801, fmt.Errorf("Unrecognized pid format \"%s\"", project_id)
 	}
 
-	db_path := PATH + "/data/" + DATABASE_NAME
-
 	var json_content map[string]interface{}
 	json_parse_err := json.Unmarshal([]byte(content), &json_content)
 	if json_content == nil {
 		return 807, fmt.Errorf("Provided json data %s could not be parsed : %s", content, json_parse_err.Error())
 	}
 
-	existent, existent_err := helper.Exists(db_path)
+	existent, existent_err := helper.Exists(DATABASE_PATH)
 	if existent_err != nil {
 		return 802, fmt.Errorf("Unable to connect to database : %s", existent_err.Error())
 	}
 
 	if !existent {
-		f, db_create_err := os.Create(db_path)
+		f, db_create_err := os.Create(DATABASE_PATH)
 		if db_create_err != nil {
 			return 803, fmt.Errorf("Unable to create database : %s", db_create_err.Error())
 		}
 		f.Close()
 	}
 
-	db, db_open_err := sql.Open("sqlite3", db_path)
-	if db_open_err != nil {
-		return 802, fmt.Errorf("Unable to connect to database : %s", db_open_err.Error())
+	db, db_err := openDB()
+	if db_err != nil {
+		return 802, fmt.Errorf("Unable to connect to database : %s", db_err.Error())
 	}
-
 	defer db.Close()
 
 	create_table_stmt := fmt.Sprintf("CREATE TABLE IF NOT EXISTS \"%s\"(ID INTEGER PRIMARY KEY AUTOINCREMENT", project_id)

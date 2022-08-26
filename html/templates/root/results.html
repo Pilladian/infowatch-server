@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+    <h2>InfoWatch</h2>
+</head>
+<body>
+    <section class="container">
+        <table>
+            <tr>
+                {{ range.Header}}
+                <th>{{ . }}</th>
+                {{ end }}
+            </tr>
+            {{ range.Rows }}
+            <tr>
+                {{ range. }}
+                <td>{{ . }}</td>
+                {{ end }}
+            </tr>
+            {{ end }}
+        </table>
+    </section>
+</body>

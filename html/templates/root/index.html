@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<head>
+    <h2>InfoWatch</h2>
+</head>
+<body>
+    <section class="container">
+        <lu>
+
+            {{ range. }}
+            <li><a href="http://localhost:8080/view?pid={{ . }}">{{ . }}</a></li><br>
+            {{ end }}
+        </lu>
+    </section>
+</body>
