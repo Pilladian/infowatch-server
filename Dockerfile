@@ -14,6 +14,8 @@ RUN go build -o /iw
 ## Deploy
 FROM gcr.io/distroless/base-debian10
 
+ENV TZ="Europe/Berlin"
+
 WORKDIR /tmp/
 
 COPY --from=build /iw /iw
