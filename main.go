@@ -24,12 +24,10 @@ func initialize() {
 
 func main() {
 	// initialize environment
+	initialize()
 	logger.SetLogLevel(2)
 	logger.SetLogFilename("./infowatch/logs/main.log")
-
 	logger.Info("--------------------------------- Starting InfoWatch ---------------------------------")
-	logger.Info("initialize environment")
-	initialize()
 
 	// http request handler
 	logger.Info("setup http request handler")
