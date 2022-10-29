@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/Pilladian/go-helper"
 	"github.com/Pilladian/logger"
@@ -15,8 +16,8 @@ var PATH string = "./infowatch"
 var DATABASE_NAME string = "infowatch.db"
 var DATABASE_PATH string = PATH + "/data/" + DATABASE_NAME
 var LEN_FILE_ID int = 30
-var BASIC_AUTH_USER = "test"
-var BASIC_AUTH_PASS = "pass"
+var BASIC_AUTH_USER = os.Getenv("BASIC_AUTH_USER")
+var BASIC_AUTH_PASS = os.Getenv("BASIC_AUTH_PASS")
 
 func initialize() {
 	helper.CreatePath(PATH)
