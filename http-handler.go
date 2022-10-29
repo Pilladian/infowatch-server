@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -16,50 +18,72 @@ import (
 // ----------------------------------------------------------------------------------
 
 func pushRequestHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" || r.Method == "HEAD" {
-		logger.Info(fmt.Sprintf("push API received a %s Request", r.Method))
-		content, os_read_err := os.ReadFile("html/templates/api/v1/push.html")
-		if os_read_err != nil {
-			logger.Error(fmt.Sprintf("cannot access file push.html : %s", os_read_err.Error()))
-			fmt.Fprintf(w, "error\n")
-			return
-		}
-		fmt.Fprintf(w, string(content))
-		return
-	} else if r.Method == "POST" {
-		pid := r.URL.Query()["pid"]
-		if len(pid) != 1 {
-			logger.Error(fmt.Sprintf("query parameter \"pid\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
-			content, _ := os.ReadFile("html/templates/api/v1/error.html")
-			fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
-			return
-		}
-		data, _ := ioutil.ReadAll(r.Body)
+	username, password, ok := r.BasicAuth()
 
-		if pid_err := validatePID(pid[0]); pid_err != nil {
-			logger.Error(fmt.Sprintf("pid validation failed: %s", pid_err.Error()))
-			fmt.Fprintf(w, "error\n")
-			return
-		}
+	if ok {
+		usernameHash := sha256.Sum256([]byte(username))
+		passwordHash := sha256.Sum256([]byte(password))
+		logger.Warning(fmt.Sprintf("Authentication Attempt: %s with password %s", username, password))
+		expectedUsernameHash := sha256.Sum256([]byte(BASIC_AUTH_USER))
+		expectedPasswordHash := sha256.Sum256([]byte(BASIC_AUTH_PASS))
 
-		if data_err := validateData(string(data)); data_err != nil {
-			logger.Error(fmt.Sprintf("Data validation failed: %s", data_err.Error()))
-			fmt.Fprintf(w, "error\n")
-			return
-		}
+		usernameMatch := (subtle.ConstantTimeCompare(usernameHash[:], expectedUsernameHash[:]) == 1)
+		passwordMatch := (subtle.ConstantTimeCompare(passwordHash[:], expectedPasswordHash[:]) == 1)
 
-		response_code, err := processData(pid[0], string(data))
-		if err != nil {
-			logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
-			fmt.Fprintf(w, "error\n")
+		if usernameMatch && passwordMatch {
+			logger.Info("Successfully logged in")
+			if r.Method == "GET" || r.Method == "HEAD" {
+				logger.Info(fmt.Sprintf("push API received a %s Request", r.Method))
+				content, os_read_err := os.ReadFile("html/templates/api/v1/push.html")
+				if os_read_err != nil {
+					logger.Error(fmt.Sprintf("cannot access file push.html : %s", os_read_err.Error()))
+					fmt.Fprintf(w, "error\n")
+					return
+				}
+				fmt.Fprintf(w, string(content))
+				return
+			} else if r.Method == "POST" {
+				pid := r.URL.Query()["pid"]
+				if len(pid) != 1 {
+					logger.Error(fmt.Sprintf("query parameter \"pid\" could not be determined correctly: http://%s%s?%s", r.Host, r.URL.Path, r.URL.RawQuery))
+					content, _ := os.ReadFile("html/templates/api/v1/error.html")
+					fmt.Fprintf(w, fmt.Sprintf(string(content), "InfoWatch could not process your request."))
+					return
+				}
+				data, _ := ioutil.ReadAll(r.Body)
+
+				if pid_err := validatePID(pid[0]); pid_err != nil {
+					logger.Error(fmt.Sprintf("pid validation failed: %s", pid_err.Error()))
+					fmt.Fprintf(w, "error\n")
+					return
+				}
+
+				if data_err := validateData(string(data)); data_err != nil {
+					logger.Error(fmt.Sprintf("Data validation failed: %s", data_err.Error()))
+					fmt.Fprintf(w, "error\n")
+					return
+				}
+
+				response_code, err := processData(pid[0], string(data))
+				if err != nil {
+					logger.Error(fmt.Sprintf("Server Response Code: %d - %s", response_code, err.Error()))
+					fmt.Fprintf(w, "error\n")
+					return
+				}
+				logger.Info(fmt.Sprintf("Successfully pushed data to server - project : %s", pid[0]))
+				fmt.Fprintf(w, "success\n")
+			} else {
+				logger.Warning(fmt.Sprintf("Push API received a %s Request", r.Method))
+				fmt.Fprintf(w, "denied\n")
+			}
 			return
+		} else {
+			logger.Error("No basic authentication was probided")
 		}
-		logger.Info(fmt.Sprintf("successfully pushed data to server - project : %s", pid[0]))
-		fmt.Fprintf(w, "success\n")
 	} else {
-		logger.Warning(fmt.Sprintf("push API received a %s Request", r.Method))
-		fmt.Fprintf(w, "denied\n")
+		logger.Error("No basic authentication was probided")
 	}
+	fmt.Fprintf(w, "denied\n")
 }
 
 // ----------------------------------------------------------------------------------
