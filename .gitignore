@@ -1,3 +1,6 @@
 # InfoWatch Files
 infowatch/
 iw
+
+# Docker build
+build.sh
